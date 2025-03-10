@@ -1,0 +1,7 @@
+ipython
+ipykernel
+matplotlib
+networkx
+numpy
+scikit-learn
+scipy
