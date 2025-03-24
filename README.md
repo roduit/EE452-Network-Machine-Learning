@@ -34,4 +34,4 @@ EE452 - Netork Machine Learning
     └── logo-epfl.png
 ```
 ## Contributors
-This repository has been elaborated by Vincent Roduit, Caspar Henking and [...] during the 2025 spring semester at EPFL.
+This repository has been elaborated by Vincent Roduit, Caspar Henking, Aurel Mäder and Jan Zgraggen during the 2025 spring semester at EPFL.
