@@ -176,4 +176,4 @@ Mutagenicity/
 raw/
 processed/
 mlruns/
-.out
+*.out
