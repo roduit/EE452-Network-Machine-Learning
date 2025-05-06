@@ -32,6 +32,7 @@ def get_git_username() -> str:
     """
     result = subprocess.run(["git", "config", "user.name"], stdout=subprocess.PIPE)
     username = result.stdout.decode("utf-8").strip()
+    print("username")
     return username
 
 
