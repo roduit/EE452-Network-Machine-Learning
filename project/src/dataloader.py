@@ -137,7 +137,10 @@ def load_data(dataset_cfg: dict, config: dict, submission:bool = False) -> DataL
         graph_cfg = config.get("graph", None)
 
         if graph_cfg is not None:
-            dataset, _ = graph_construction(dataset, graph_cfg, dataset_cfg)
+            if tfm_name == "fusion":
+                dataset = fusion_graph_construction(dataset, graph_cfg, dataset_cfg)
+            else: dataset, _ = graph_construction(dataset, graph_cfg, dataset_cfg)
+
             
             return torch_geometric.loader.DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, sampler=sampler)
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, sampler=sampler)
@@ -310,7 +313,49 @@ def graph_construction(dataset, graph_cfg, cfg):
 
     else:
         raise ValueError("This graph construction method is not implemented.")
+
+
+def fusion_graph_construction(dataset, graph_cfg, cfg):
     
+    graph_type = graph_cfg.get("type", None)
+    
+    data_set = cfg.get("set", None)
+
+    if graph_type == 'correlation':
+        edge_threshold =  graph_cfg.get("edge_threshold", None)
+        corelation_base = graph_cfg.get("corelation_base", None)
+        correlation_graphs = []
+
+        for i in range(len(dataset)):
+            if corelation_base == "fft":
+                data = np.asarray(dataset[i][0].fft.T, dtype=np.float32) 
+            elif corelation_base == "time":
+                data = np.asarray(dataset[i][0].time.T, dtype=np.float32) 
+            else:
+                raise ValueError("corelation_base must be either 'fft' or 'time'.")
+            adj_matrix = safe_corrcoef(data)
+            adj_matrix = np.where(adj_matrix > edge_threshold, adj_matrix, 0)
+            np.fill_diagonal(adj_matrix, 0)
+
+
+            adj_tensor = torch.tensor(adj_matrix)
+            edge_index, edge_weight = torch_geometric.utils.dense_to_sparse(adj_tensor)
+
+            x_tensor = torch.from_numpy(np.asarray(dataset[i][0].fft.T, dtype=np.float32))  # shape: (n_channels, signal_len)
+            time_tensor = torch.from_numpy(np.asarray(dataset[i][0].time.T, dtype=np.float32))  # shape: (n_channels, signal_len)
+            pyg_graph = torch_geometric.data.Data(x=x_tensor,time= time_tensor, edge_index=edge_index, edge_attr=edge_weight) # edge_weight=edge_weight
+            if data_set != "test":
+                pyg_graph.y = torch.tensor(dataset[i][1], dtype=torch.int64)
+            else:
+                pyg_graph.id = dataset[i][1]
+
+            correlation_graphs.append(pyg_graph)
+            
+        return correlation_graphs
+    else: raise ValueError("Only correlation supported for fusion.")
+
+
+
 def safe_corrcoef(X, eps=1e-8):
     X = X - np.mean(X, axis=1, keepdims=True)
     std = np.std(X, axis=1, keepdims=True)

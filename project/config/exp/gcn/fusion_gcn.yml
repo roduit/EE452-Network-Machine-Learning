@@ -1,0 +1,53 @@
+# project/config/exp/graph/basic_gcn.yml
+experiment: "gcn_emb512128"
+name: "gcn_corr_fft_emb"
+description: "Two-layer GCN with MLP embedded nodes for seizure prediction, using correlation graph."
+task: "dropout_rm"
+
+# Data (same splits as before)
+config_dataset:
+  val_size: 0.2
+  tfm: "fusion"
+  graph: 
+      type: "correlation"
+      corelation_base: "fft"
+      edge_threshold: 0.8
+  num_workers: 4
+  batch_size: 64
+
+datasets:
+-
+  set: "train"
+  path: "/home/ogut/data/train"
+  sampling: True
+  size: 1
+  shuffle: True
+
+-
+  set: "val"
+  path: "/home/ogut/data/train"
+  shuffle: False
+
+-
+  set: "test"
+  path: "/home/ogut/data/test"
+  shuffle: False
+
+# Model
+model:
+  name: "FusionGCN"
+  n_epochs: 20
+  optimizer: "Adam"
+  use_scheduler: True
+  learning_rate: 1e-4
+  criterion: "BCEWithLogitsLoss"
+
+config:
+    input_dim_lin: 354
+    input_dim_lstm: 3000
+    hidden_dim_lstm: 256
+    emb_dim: 128
+    num_layer_lstm: 2
+    dropout: 0.5
+    hidden_dim_lin: 512
+    hidden_gcn:  64
