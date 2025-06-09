@@ -382,6 +382,8 @@ def get_transform(tfm_name: str) -> callable:
         return power_spectral_density
     elif tfm_name == "wavelet":
         return wavelet_transform_filtering
+    elif tfm_name == "fusion":
+        return fusion_transform
     else:
         return None
 

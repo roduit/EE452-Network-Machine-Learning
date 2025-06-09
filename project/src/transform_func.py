@@ -113,3 +113,30 @@ def power_spectral_density(x: np.ndarray) -> np.ndarray:
     psd_signals = np.where(np.abs(psd_signals) > 1e-8, np.abs(psd_signals), 1e-8).T
 
     return psd_signals
+
+
+class multiFeature: 
+    def __init__(self, fft=None, time=None):
+        self.fft = fft
+        self.time = time
+        self.shape = self.shape()
+    def shape(self):
+        return self.fft.shape, self.time.shape
+    
+
+def fusion_transform(x: np.ndarray) -> dict:
+    """Apply both time-domain filtering and FFT, return as a dict."""
+    # Time-domain preprocessing
+    time_feat = clean_input(x.copy())
+
+    # Frequency-domain processing
+    fft_feat = fft_filtering(time_feat.copy())
+
+    # Convert to tensors
+    time_feat = torch.tensor(time_feat, dtype=torch.float)
+    fft_feat = torch.tensor(fft_feat, dtype=torch.float)
+
+    # Normalize FFT features
+    fft_feat = (fft_feat - fft_feat.mean(dim=0)) / (fft_feat.std(dim=0) + 1e-6)
+
+    return multiFeature(fft=fft_feat, time=time_feat)
