@@ -9,7 +9,7 @@ Ecole Polytechnique Fédérale de Lausanne
 EE452 - Netork Machine Learning
 </div> 
 
-# EE452 - Netork Machine Learning
+# EE452 - Network Machine Learning
 
 ## Table of Contents
 
