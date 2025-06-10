@@ -177,3 +177,6 @@ raw/
 processed/
 mlruns/
 *.out
+
+#vscode
+.vscode/
